@@ -1,0 +1,333 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux 常用命令 | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Linux 常用命令 | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Linux 常用命令
+#监控网络流量命令
+iftop -nN -i ens5
+#https://blog.csdn.net/guotianqing/article/details/109822561
+
+查看
+timedatectl
+
+CST..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Linux 常用命令
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="linux-常用命令">Linux 常用命令</h2>
+<pre><code class="language-sh">#监控网络流量命令
+iftop -nN -i ens5
+#https://blog.csdn.net/guotianqing/article/details/109822561
+
+查看
+timedatectl
+
+CST格式 = 上海时间的意识
+timedatectl set-timezone “Asia/Shanghai”
+</code></pre>
+<h2 id="日志查询grep">日志查询Grep</h2>
+<pre><code class="language-sh">
+查看关键字
+grep -r MU2608821366522978304 third-server-job-info-2021-11-28.*.log &gt;/tmp/2325556480.txt
+
+
+查看哪10秒里的日志 2021-11-26 16:14:5[0-9] 
+grep  '2021-11-26 16:14:5[0-9]' business-info.2021-11-26.*.log &gt;/tmp/lb-business-2021-11-26.txt
+
+
+查询2个条件
+grep  '2022-05-20 01:[0-3][0-9]:[0-9][0-9]'  business-info.2022-05-20.*.log |grep '获取用户:dongfafa123' -C 5 &gt;/tmp/lb-business2-2022-05-20.txt
+
+grep -A 5 'parttern' filename //打印匹配行的后5行
+grep -B 5 'parttern' filename //打印匹配行的前5行
+grep -C 5 'parttern' filename //打印匹配行的前后5行
+grep -5 'parttern' filename //打印匹配行的前后5行 
+
+tail -n 5 filename 查看文件最后5行内容
+head -n 5 filename 查看文件前5行内容
+sed -n '5,10p' 查看文件5-10行内容 
+
+-------------------
+在服务器上搜索
+
+显示最后 1000 行 的 内容 | 符合 0403737030061055651 的后五行
+tail output.log -n1000 |grep 0403737030061055651 -A 10
+
+-------------------
+查看该目录上的文件内容
+find ./ -name &quot;*.conf&quot; | xargs grep &quot;47.243.162.106&quot;
+</code></pre>
+<h2 id="notepad-使用">notepad ++ 使用</h2>
+<pre><code class="language-sh">Find lines not starting with &quot; in Notepad++
+^[^1]
+
+2个或以上的空格键
+[ ][ ]* 
+</code></pre>
+<h2 id="linux中shell变量012的含义解释">linux中shell变量<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲,'>#,</span>@,$0,$1,$2的含义解释:</h2>
+<pre><code class="language-sh">变量说明: 
+$$ 
+Shell本身的PID（ProcessID） 
+$! 
+Shell最后运行的后台Process的PID 
+$? 
+最后运行的命令的结束代码（返回值） 
+$- 
+使用Set命令设定的Flag一览 
+$* 
+所有参数列表。如&quot;$*&quot;用「&quot;」括起来的情况、以&quot;$1 $2 … $n&quot;的形式输出所有参数。 
+$@ 
+所有参数列表。如&quot;$@&quot;用「&quot;」括起来的情况、以&quot;$1&quot; &quot;$2&quot; … &quot;$n&quot; 的形式输出所有参数。 
+$# 
+添加到Shell的参数个数 
+$0 
+Shell本身的文件名 
+$1～$n 
+添加到Shell的各参数值。$1是第1参数、$2是第2参数…。 
+</code></pre>
+<h2 id="awk">awk</h2>
+<pre><code class="language-sh"> 组合查找
+cat test.txt |awk '/^00/ {++S[$NF]} END {for (a in S) print a,S[a]}'
+awk '/^00/ {++S[$NF]} END {for (a in S) print a,S[a]}' test.txt
+
+查看log 关键字组合 AWK， ARRAY ,FOR loop
+awk '{++S[$1]} END {for (a in S) print a ,S[a]}' test.log |sort -rn -k2
+
+查看log 关键字组合 
+awk '{print $1}' access.log|sort|uniq -c |sort -rn -k1
+
+---------------------------------------------------------------------------------
+
+while (condition) action 
+awk  'i=1 {} BEGIN {while (i&lt;10) {++i;print i}}'
+
+do ; action ; while (condition)
+awk 'BEGIN　｛do {i++;print i}while (i&lt;10)｝' 
+
+for loop 
+awk 'BEGIN {for (x=1;x++;x&lt;10) print x}'
+
+if else 两个条件
+grep &quot;abc&quot; /test.txt | awk {if ($1&lt;10) print $0 ; else print &quot;OK&quot;}
+
+一段时间数据写到另外一个文件
+awk '/14:00:00/,/14:05:00/'｛print｝ /test.txt &gt;&gt; abc123.txt
+</code></pre>
+<h2 id="iptables">iptables</h2>
+<pre><code class="language-sh">
+查看
+sudo iptables -nL |grep 18.163.237.127
+
+添加
+sudo iptables -I INPUT -p tcp -s 18.163.237.127 --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+iptables -I INPUT -p all -s 172.16.0.0/16 -j ACCEPT #开启内网全部端口
+
+删除
+iptables --delete INPUT -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+执行后需要保存
+service iptables save
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#linux-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4">Linux 常用命令</a></li>
+<li><a href="#%E6%97%A5%E5%BF%97%E6%9F%A5%E8%AF%A2grep">日志查询Grep</a></li>
+<li><a href="#notepad-%E4%BD%BF%E7%94%A8">notepad ++ 使用</a></li>
+<li><a href="#linux%E4%B8%ADshell%E5%8F%98%E9%87%8F012%E7%9A%84%E5%90%AB%E4%B9%89%E8%A7%A3%E9%87%8A">linux中shell变量<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲,'>#,</span>@,$0,$1,$2的含义解释:</a></li>
+<li><a href="#awk">awk</a></li>
+<li><a href="#iptables">iptables</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/k8s-chang-yong-ming-ling/">
+              <h3 class="post-title">
+                k8s 常用命令
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

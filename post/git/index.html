@@ -1,0 +1,338 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Git | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Git
+Git 场景
+工作区 》 临时区 》 本地区 》 远程区
+
+
+git init 	//  库初始化 Initialize Local Git Repository 
+git add 	 // 添加到分支
+git status 	 /..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Git
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="git">Git</h2>
+<pre><code class="language-sh">Git 场景
+工作区 》 临时区 》 本地区 》 远程区
+
+
+git init 	//  库初始化 Initialize Local Git Repository 
+git add 	 // 添加到分支
+git status 	 // 查看文件状态
+git commit  	//  主要是将暂存区里的改动给提交到本地的版本库
+git push  	// 推送
+git pull  	 // 拉取
+git clone 	// 复制到特定的目录，从服务器上复制
+
+git-blame  // Show what revision and author last modified each line of a file
+git config -l     // 看 原本的配置 
+----------------------------------------------
+
+git init就是git库初始化的命令。如你所说，在任何一个文件夹下执行就是初始化这个文件夹，
+此时执行git status，可以看到文件夹下的所有文件都变成未被跟踪的文件。
+git init
+
+初始化后，需要先注册
+git config --global user.name ‘anson’
+git config --global user.email ‘ansonyean626@gmail.com’
+
+添加项目到临时工作区
+git add index.html
+
+
+git status // 可以看到文件的状态
+
+git add 《文件》   // 添加单一文件测试环境
+git rm --cached index.html 《文件》  //在测试环境中移除
+
+
+查看git 日志
+git log
+git log --pretty=oneline
+git log --oneline
+git reflog
+
+git add .  //添加所有的文件到测试环境
+
+git commit 
+输入后会进入到commit 文件里
+修改内容，然后保存
+
+指定的 分支
+git checkout -b abc123
+
+git commit  -m 'Change app.js'
+执行者命令不用做修改，直接可以到测试环境
+
+远程
+git remote 
+git remote show origin 
+git remote add gitlab https://abc123.com
+git remote 
+
+创建dev 分支
+git branch dev
+
+
+touch .gitignore     // 把文件添加到gitignore 里面会
+---------------------------------------------------------------
+分支
+创建了一个新分支的指针
+$ git branch anson
+$ git checkout anson
+
+git merge login
+
+---------------------------------------------------------------------
+Push an existing folder
+cd existing_folder
+git init
+git remote add origin git@gitlab.tecmint.com:anson2/gcpmyproject.git
+git add .
+git commit -m &quot;Initial commit&quot;
+git push -u origin master
+</code></pre>
+<h2 id="git-远程">Git 远程</h2>
+<pre><code>查看远程的提交日志信息 （仓库名/分支）
+git log origin/main
+
+显示远程的详细信息
+git branch -va 
+
+设定远程邮件
+git config --global user.name anson
+git config --global user.email anson@testing.com
+
+添加指定的文件到缓存区
+[root@test edisguns]# git add README.md 
+
+保存到 本地区
+[root@test edisguns]# git commit -m &quot;Readme.md&quot;
+
+推送到远程机器
+git push origin --all
+
+取origin 仓库的分支
+git fetch origin devlop
+
+切换分支
+git checkout devlop
+
+合并
+git merge FETCH_HEAD
+
+本地删除
+git branch -D devlop
+删除后，再远程推一次，就可以远程删除了
+git push origin :devlop
+
+
+打标签
+git tag &quot;v0.2&quot;
+把已打好的标签一起推送上去
+git push origin --tags
+</code></pre>
+<h2 id="github-推送方式">Github 推送方式</h2>
+<pre><code class="language-sh">#需要到setting 》 developer 》 personal token 上设定token先
+git remote set-url origin https://&lt;GITHUB_ACCESS_TOKEN&gt;@github.com/&lt;GITHUB_USERNAME&gt;/&lt;REPOSITORY_NAME&gt;.git
+git push origin main
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#git">Git</a></li>
+<li><a href="#git-%E8%BF%9C%E7%A8%8B">Git 远程</a></li>
+<li><a href="#github-%E6%8E%A8%E9%80%81%E6%96%B9%E5%BC%8F">Github 推送方式</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/docker/">
+              <h3 class="post-title">
+                Docker
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,301 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nginx 编译安装 | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Nginx 编译安装 | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Nginx 编译安装
+#!/bin/bash
+#
+
+insdir=/usr/local/nginx
+pw=`pwd`
+
+tarname=`ls -l |grep '^-.*nginx-1.*tar\.gz$'| awk '{print $9..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Nginx 编译安装
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="nginx-编译安装">Nginx 编译安装</h2>
+<pre><code class="language-sh">#!/bin/bash
+#
+
+insdir=/usr/local/nginx
+pw=`pwd`
+
+tarname=`ls -l |grep '^-.*nginx-1.*tar\.gz$'| awk '{print $9}'`
+tar xf $tarname &amp;&amp; pr &quot;解压源码包成功&quot; 1  ||pr &quot;解压源码包失败&quot; 2
+tardir=`ls -l |grep '^d.*nginx-1.*'| awk '{print $9}'`
+. /etc/init.d/functions
+pr() {
+case $2 in
+1)
+        ex=true
+        ;;
+2)
+        ex=false
+        ;;
+*)
+        echo &quot;printout函数参数错误&quot;
+        exit 1
+        ;;
+esac
+action &quot;$1&quot; /bin/$ex
+}
+
+yum install -y  lrzsz  screen lsof gcc gcc-c++ \
+glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools iotop bc \
+zip unzip zlib-devel bash-completion nfs-utils automake libxml2 libxml2-devel \
+libxslt libxslt-devel perl perl-ExtUtils-Embed -y &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+pr &quot;安装开发包&quot; 1 ||pr &quot;安装开发包&quot; 2
+
+mkdir -p $insdir &amp;&amp; pr &quot;创建安装路基目录&quot; 1 ||pr &quot;创建安装路基目录&quot; 2
+echo &quot;执行configure 请稍后 &quot;
+
+cd $pw/$tardir
+./configure --prefix=$insdir/ \
+--user=nginx \
+--group=nginx \
+--with-http_ssl_module \
+--with-http_v2_module \
+--with-http_realip_module \
+--with-http_stub_status_module \
+--with-http_gzip_static_module \
+--with-pcre \
+--with-stream \
+--with-stream_ssl_module \
+--with-stream_realip_module  &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+pr &quot;执行configure&quot; 1 ||pr &quot;执行configure&quot; 2
+echo &quot;make install 中 请稍等 &quot;
+make &gt;/dev/null 2&gt;&amp;1 &amp;&amp; make install &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ pr &quot;make install&quot; 1 ||pr &quot;make install&quot; 2
+ 
+useradd nginx -s /sbin/nologin -u 2000
+chown nginx.nginx -R $insdir/ 
+
+ln -s $insdir/sbin/nginx  /usr/sbin/nginx &gt;/dev/null 2&gt;&amp;1
+echo &quot;[Unit] 
+Description=The nginx HTTP and reverse proxy server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=$insdir/logs/nginx.pid
+
+
+ExecStartPre=/usr/bin/rm -f $insdir/logs/nginx.pid 
+ExecStartPre=$insdir/sbin/nginx -t
+ExecStart=$insdir/sbin/nginx
+ExecReload=/bin/kill -s HUP \$MAINPID
+
+#KillSignal=SIGQUIT
+#TimeoutStopSec=5
+KillMode=process
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target&quot; &gt; /usr/lib/systemd/system/nginx.service &amp;&amp; \
+pr &quot;创建服务脚本&quot; 1 ||pr &quot;创建服务脚本&quot; 2
+
+echo &quot;export NGINX_HOME=$insdir
+export PATH=\$PATH:\$NGINX_HOME/sbin&quot; &gt;/etc/profile.d/nginx.sh &amp;&amp; \
+pr &quot;配置环境变量&quot; 1 ||pr &quot;配置环境变量&quot; 2
+source /etc/profile.d/nginx.sh
+systemctl daemon-reload &amp;&amp; \
+systemctl start nginx  &amp;&amp; \
+systemctl enable nginx &amp;&amp; \
+pr &quot;启动NGINX&quot; 1 ||pr &quot;启动NGINX&quot; 2
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#nginx-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85">Nginx 编译安装</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/nginx-4-ceng-dai-li-pei-zhi/">
+              <h3 class="post-title">
+                Nginx 4 层代理配置
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

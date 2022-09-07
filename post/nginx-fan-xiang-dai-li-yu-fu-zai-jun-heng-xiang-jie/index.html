@@ -1,0 +1,303 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nginx 反向代理与负载均衡详解 | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Nginx 反向代理与负载均衡详解 | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Nginx 反向代理与负载均衡详解
+https://www.runoob.com/w3cnote/nginx-proxy-balancing.html
+#vim /etc/nginx/conf.d/test.conf
+
+proxy_temp..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Nginx 反向代理与负载均衡详解
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="nginx-反向代理与负载均衡详解">Nginx 反向代理与负载均衡详解</h2>
+<p>https://www.runoob.com/w3cnote/nginx-proxy-balancing.html</p>
+<pre><code class="language-sh">#vim /etc/nginx/conf.d/test.conf
+
+proxy_temp_path     /tmp/proxy_temp;
+proxy_cache_path    /tmp/proxy_cache levels=1:2 keys_zone=cache_one:500m inactive=1d max_size=30g;
+proxy_redirect      off;
+proxy_set_header    Host $host; #只要用户在浏览器中访问的域名绑定了 VIP VIP 下面有RS；则就用$host ；host是访问URL中的域名和端口
+proxy_set_header    X-Real-IP $remote_addr; ##把源IP 【$remote_addr,建立HTTP连接header里面的信息】赋值给X-Real-IP;这样在代码中 $X-Real-IP来获取 源IP
+proxy_set_header    Web-Server-Type  nginx;
+proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for; 
+#在nginx 作为代理服务器时，设置的IP列表，会把经过的机器ip，代理机器ip都记录下来，用 【，】隔开；代码中用 echo $x-forwarded-for |awk -F, '{print $1}' 来作为源IP
+limit_req_zone 		$remote_addr zone=perip:10m rate=10r/s;
+# $binary_remote_addr，这里是客户端的ip地址,在这里是做限制的标识，是基于ip地址来限制
+# zone=perip:20m:  perip是内存区域的名字, 20m： 生成的内存区域的大小
+# rate=1r/s：允放相同标识的客户端的访问频次，在这个例子中：就是同一个ip地址在每秒内只能访问1次
+
+upstream publish_web {
+    server 168.63.205.2:80 max_fails=1 fail_timeout=10s  weight=1;
+    server 119.8.232.57:80 max_fails=1 fail_timeout=10s  weight=1;
+    server 168.63.207.139:80 max_fails=1 fail_timeout=10s  weight=1;
+	#突然有一个节点挂掉，客户端请求过来后哪怕请求到了不可用的节点，此次请求也不会失败，因为Nginx会把此次请求转发到另外一个可用节点，再把结果返回给客户端。
+}
+
+server {
+    listen *:8080;
+    limit_req zone=perip burst=1 nodelay;
+	
+    limit_req_status 503;
+	#用来指定请求时报错产生的状态码:
+    location / {
+        proxy_next_upstream http_502 http_504 error timeout invalid_header;
+		#502、500、503、504只有在配置proxy_next_upstream后nginx才会记录这4种HTTP错误到fails中，当fails大于等于max_fails时，则该节点失效；
+        proxy_set_header    Host &quot;mdeudgbo.com&quot;;
+        proxy_pass_header 	Set-Cookie;
+	    proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    Web-Server-Type  nginx;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://publish_web; #转发域名或IP加端口的请求
+    }
+
+    location ~* .*\.(htm|html|js|css|gif|jpg|png|jpeg|bmp|ico|swf|flv)(\?[^\.]+)?$ {
+        proxy_next_upstream http_500 http_502 http_503 http_504 error timeout invalid_header;
+        proxy_set_header    Host &quot;mdeudgbo.com&quot;;
+	    proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    Web-Server-Type  nginx;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+		
+		proxy_cache cache_one; # 表示使用前面http模块里定义的名为&quot;cache_one&quot; 的缓存，这个名字是可以随便定义的
+        proxy_cache_valid 200 304 15m; #表示缓存http状态码为200(表示成功)的时间为10 分钟
+        proxy_cache_valid 301 302 10m;
+        proxy_cache_valid any 1m;
+        proxy_cache_key $host$uri$is_args$args; #指定缓存所使用的key的组合字符串，然后用md5进行加密。
+		
+        add_header Ten-webcache '$upstream_cache_status from $host';
+        proxy_pass http://publish_web;
+        expires 30m;
+        access_log off;
+    }
+}
+</code></pre>
+<h2 id="nginxconf-主配置">nginx.conf 主配置</h2>
+<pre><code class="language-sh">#vim  /etc/nginx/nginx.conf
+
+user root;
+worker_processes 8;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 65535;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '
+                      '$status $body_bytes_sent &quot;$http_referer&quot; '
+                      '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+	
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    include /etc/nginx/conf.d/*.conf;
+
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%AF%A6%E8%A7%A3">Nginx 反向代理与负载均衡详解</a></li>
+<li><a href="#nginxconf-%E4%B8%BB%E9%85%8D%E7%BD%AE">nginx.conf 主配置</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/nginx-bian-yi-an-zhuang/">
+              <h3 class="post-title">
+                Nginx 编译安装
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

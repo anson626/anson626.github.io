@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Docker | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Docker | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Docker
+Docker 和 docker compose 安装
+#install docker 
+cd /etc/yum.repos.d/
+wget https://download.docker.com/linux/centos/do..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Docker
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                1 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="docker">Docker</h2>
+<h3 id="docker-和-docker-compose-安装">Docker 和 docker compose 安装</h3>
+<pre><code class="language-sh">#install docker 
+cd /etc/yum.repos.d/
+wget https://download.docker.com/linux/centos/docker-ce.repo 
+yum install docker-ce -y
+
+systemctl start docker &amp;&amp; systemctl enable docker &amp;&amp; systemctl status docker
+
+#install docker-compose
+curl -L &quot;https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)&quot; -o /usr/local/bin/docker-compose
+
+chmod +x /usr/local/bin/docker-compose
+docker-compose version
+</code></pre>
+<h3 id="docker-harbor">Docker Harbor</h3>
+<pre><code class="language-sh">#登陆docker 先
+docker login test.xinyuerh.com
+
+#拉取镜像 需要docker login 先才能拉取
+docker pull harbor.mir708090.com/edisguns/edis-guns-kubesphere@sha256:940786fe443a88d7758e2a068081f15af82ee35874c152c10bc7bce9c15f327a
+
+#修改名
+docker image tag 0e687ce6526b test.xinyuerh.com/edisguns/edis-guns-kubesphere:v1
+
+#使用docker login 到
+docker push test.xinyuerh.com/edisguns/edis-guns-kubesphere:v1
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#docker">Docker</a>
+<ul>
+<li><a href="#docker-%E5%92%8C-docker-compose-%E5%AE%89%E8%A3%85">Docker 和 docker compose 安装</a></li>
+<li><a href="#docker-harbor">Docker Harbor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/clamsan-bing-du-sao-miao/">
+              <h3 class="post-title">
+                Clamsan 病毒扫描
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

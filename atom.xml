@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://anson626.github.io</id>
+    <title>Anson 博客</title>
+    <updated>2022-09-07T03:43:50.915Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://anson626.github.io"/>
+    <link rel="self" href="https://anson626.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://anson626.github.io/images/avatar.png</logo>
+    <icon>https://anson626.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, Anson 博客</rights>
+    <entry>
+        <title type="html"><![CDATA[升级centos 内核 Linux Kerner]]></title>
+        <id>https://anson626.github.io/post/sheng-ji-centos-nei-he-linux-kerner/</id>
+        <link href="https://anson626.github.io/post/sheng-ji-centos-nei-he-linux-kerner/">
+        </link>
+        <updated>2022-09-07T03:42:27.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="升级centos-内核-linux-kerner">升级centos 内核 Linux Kerner</h2>
+<pre><code class="language-sh">#参考
+https://www.cnblogs.com/yanjieli/p/14839445.html
+
+#先查看目前的版本
+uname -sr
+
+#安装yum源
+
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+#列出可安装的系统内核相关包
+
+yum --disablerepo=&quot;*&quot; --enablerepo=&quot;elrepo-kernel&quot; list available
+#说明： lt是长支持版本 ml是最新稳定版本
+
+#安装lt - 安装长期支持版
+
+yum -y  --enablerepo=elrepo-kernel install kernel-lt
+
+#或者安装ml
+yum -y --enablerepo=elrepo-kernel install kernel-ml
+#设置 GRUB 默认的内核版本 编辑 /etc/default/grub 并设置 GRUB_DEFAULT=0
+
+#意思是 GRUB 初始化页面的第一个内核将作为默认内核.
+
+vi /etc/default/grub
+
+GRUB_DEFAULT=0
+
+#重新创建内核配置. 然后重启
+grub2-mkconfig -o /boot/grub2/grub.cfg
+shutdown -r now
+#检查当前 CentOS 系统内核版本
+
+uname -r
+#打印出
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[PHP 搭配nginx 需要 php-fpm sock]]></title>
+        <id>https://anson626.github.io/post/php-da-pei-nginx-xu-yao-php-fpm-sock/</id>
+        <link href="https://anson626.github.io/post/php-da-pei-nginx-xu-yao-php-fpm-sock/">
+        </link>
+        <updated>2022-09-07T03:42:06.000Z</updated>
+        <content type="html"><![CDATA[<p>PHP 搭配nginx 需要 php-fpm sock</p>
+<pre><code class="language-sh">
+PHP 编译安装
+https://juejin.cn/post/7091485805058719757
+
+
+下载地址，目前都市用8版本
+https://www.php.net/downloads.php
+
+
+依赖
+yum -y install gcc gcc-c++ \makelibxml2-devel openssl-devel curl-devel libjpeg-devel libpng-devel libicu-devel sqlite-devel freetype-devel openldap-devel openldap openldap-devel
+
+
+下载后编译安装
+wget https://www.php.net/distributions/php-8.1.8.tar.gz
+
+
+./configure --prefix=/usr/local/php \
+   --with-config-file-scan-dir=/usr/local/php/etc/ \
+   --with-mhash --with-pdo-mysql \
+   --with-openssl --with-mysqli \
+   --with-iconv --with-zlib \
+   --enable-inline-optimization \
+   --disable-debug --disable-rpath \
+   --enable-shared --enable-xml \
+   --enable-bcmath --enable-shmop \
+   --enable-sysvsem --enable-sysvshm --enable-mbregex \
+   --enable-ftp \
+   --enable-pcntl --enable-sockets \
+   --with-xmlrpc --enable-soap \
+   --without-pear --with-gettext \
+   --enable-session --with-curl \
+   --enable-opcache --enable-fpm \
+   --without-gdbm --enable-fast-install \
+   --disable-fileinfo
+
+
+编译安装
+make &amp;&amp; make install
+
+
+cp ~/php-7.4.0/php.ini-production /usr/local/php/etc/php.ini
+cp /usr/local/php8/etc/php-fpm.conf.default /usr/local/php8/etc/php-fpm.conf
+cp /usr/local/php8/etc/php-fpm.d/www.conf.default /usr/local/php8/etc/php-fpm.d/www.conf
+
+
+vim /usr/local/php8/etc/php-fpm.conf
+
+; 去掉里分号，方便以后重启。建议修改
+;Default Value: none
+; 下面的值最终目录是/usr/local/php/var/run/php-fpm.pid
+; 开启后可以平滑重启php-fpm
+pid = run/php-fpm.pid
+; 引入www.conf文件中的配置，可以默认值
+include=/usr/local/php/etc/php-fpm.d/*.conf     
+
+
+
+sed -i '/^;.*/d;/^$/d' www.conf   #删除空格
+sed -i '/#.*/d' www.conf          #删除文件中的#注释 
+
+
+vim /usr/local/php8/etc/php-fpm.d/www.conf
+
+; 设置用户和用户组，默认都是nobody。可以默认值
+user = www
+group = www
+
+; 设置PHP监听
+; 下面是默认值，不建议使用。可以默认值，9000端口会被占用，而且使用nginx和php-fpm采用tcp通信相对较慢，使用sock本机同喜无需多余网络消耗
+;listen = 127.0.0.1:9000
+; 根据nginx.conf中的配置fastcgi_pass unix:/run/php-fpm/php-fpm.sock;这俩路径要一致，否则502
+；代表php监听这个端口，nginx接收到webserver的php文件发送到这个端口
+listen = /run/php-fpm/php-fpm.sock
+;如果使用sock监听，下面三个选项要设置，否则php-fpm会以root启动，nginx访问不到。如果是root启动，需要chmod 666 /run/php-fpm/php-fpm.sock才可以，否则会502
+listen.owner = www
+listen.group = www
+listen.mode = 0666
+
+
+groupadd www \
+useradd -g www www
+
+/usr/local/php/sbin/php-fpm -t        # php-fpm检测配置文件是否正确
+/usr/local/php/sbin/php-fpm         # php-fpm启动
+kill -INT `cat /usr/local/php/var/run/php-fpm.pid`      # php-fpm关闭
+pkill php-fpm #直接杀掉所有php
+kill -USR2 `cat /usr/local/php/var/run/php-fpm.pid`     #php-fpm平滑重启
+php -v #查看php信息
+php -m #查看php扩展
+</code></pre>
+<p>php-fpm.sock 路径要要和 nginx 一样 不然就会出现 502报错</p>
+<pre><code class="language-sh">
+vim /usr/local/php8/etc/php-fpm.d/www.conf
+
+[www]
+user = nginx
+group = nginx
+;listen = 127.0.0.1:9000
+listen = /run/php-fpm/php-fpm.sock
+listen.owner = nginx
+listen.group = nginx
+listen.mode = 0666
+pm = dynamic
+pm.max_children = 100
+pm.start_servers = 20
+pm.min_spare_servers = 5
+pm.max_spare_servers = 35
+</code></pre>
+<p>nginx 配置 路径要注意</p>
+<pre><code class="language-sh">server {
+        listen      80;
+        server_name example.com 192.168.164.11;
+        root        /var/www/laravel/public;
+        index       index.php;
+
+        charset utf-8;
+        gzip on;
+        gzip_types text/css application/javascript text/javascript application/x-javascript     image/svg+xml text/plain text/xsd text/xsl text/xml image/x-icon;
+        location / {
+                try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php {
+                include fastcgi.conf;
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+        }
+        location ~ /\.ht {
+                deny all;
+        }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[OpenVPN]]></title>
+        <id>https://anson626.github.io/post/openvpn/</id>
+        <link href="https://anson626.github.io/post/openvpn/">
+        </link>
+        <updated>2022-09-07T03:41:36.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="openvpn">OpenVPN</h2>
+<pre><code class="language-sh">从gofastdfs-node2 传送到新的服务器new-gofastdfs-node2
+在新的服务器new-gofastdfs-node2执行这命令
+rsync -azP -e 'ssh -p 15878' root@172.16.0.47:/data/apps/go-fastdfs/ /data/apps/go-fastdfs/
+
+在这gofastdfs-node1执行 
+rsync -azP /data/apps/go-fastdfs/ -e 'ssh -p 11618' root@172.16.0.122:/data/apps/go-fastdfs/
+</code></pre>
+<p>英文openvpn 安装方式</p>
+<pre><code class="language-sh">
+https://github.com/angristan/openvpn-install
+
+
+curl -O https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-install.sh
+chmod +x openvpn-install.sh
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx 反向代理与负载均衡详解]]></title>
+        <id>https://anson626.github.io/post/nginx-fan-xiang-dai-li-yu-fu-zai-jun-heng-xiang-jie/</id>
+        <link href="https://anson626.github.io/post/nginx-fan-xiang-dai-li-yu-fu-zai-jun-heng-xiang-jie/">
+        </link>
+        <updated>2022-09-07T03:41:12.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="nginx-反向代理与负载均衡详解">Nginx 反向代理与负载均衡详解</h2>
+<p>https://www.runoob.com/w3cnote/nginx-proxy-balancing.html</p>
+<pre><code class="language-sh">#vim /etc/nginx/conf.d/test.conf
+
+proxy_temp_path     /tmp/proxy_temp;
+proxy_cache_path    /tmp/proxy_cache levels=1:2 keys_zone=cache_one:500m inactive=1d max_size=30g;
+proxy_redirect      off;
+proxy_set_header    Host $host; #只要用户在浏览器中访问的域名绑定了 VIP VIP 下面有RS；则就用$host ；host是访问URL中的域名和端口
+proxy_set_header    X-Real-IP $remote_addr; ##把源IP 【$remote_addr,建立HTTP连接header里面的信息】赋值给X-Real-IP;这样在代码中 $X-Real-IP来获取 源IP
+proxy_set_header    Web-Server-Type  nginx;
+proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for; 
+#在nginx 作为代理服务器时，设置的IP列表，会把经过的机器ip，代理机器ip都记录下来，用 【，】隔开；代码中用 echo $x-forwarded-for |awk -F, '{print $1}' 来作为源IP
+limit_req_zone 		$remote_addr zone=perip:10m rate=10r/s;
+# $binary_remote_addr，这里是客户端的ip地址,在这里是做限制的标识，是基于ip地址来限制
+# zone=perip:20m:  perip是内存区域的名字, 20m： 生成的内存区域的大小
+# rate=1r/s：允放相同标识的客户端的访问频次，在这个例子中：就是同一个ip地址在每秒内只能访问1次
+
+upstream publish_web {
+    server 168.63.205.2:80 max_fails=1 fail_timeout=10s  weight=1;
+    server 119.8.232.57:80 max_fails=1 fail_timeout=10s  weight=1;
+    server 168.63.207.139:80 max_fails=1 fail_timeout=10s  weight=1;
+	#突然有一个节点挂掉，客户端请求过来后哪怕请求到了不可用的节点，此次请求也不会失败，因为Nginx会把此次请求转发到另外一个可用节点，再把结果返回给客户端。
+}
+
+server {
+    listen *:8080;
+    limit_req zone=perip burst=1 nodelay;
+	
+    limit_req_status 503;
+	#用来指定请求时报错产生的状态码:
+    location / {
+        proxy_next_upstream http_502 http_504 error timeout invalid_header;
+		#502、500、503、504只有在配置proxy_next_upstream后nginx才会记录这4种HTTP错误到fails中，当fails大于等于max_fails时，则该节点失效；
+        proxy_set_header    Host &quot;mdeudgbo.com&quot;;
+        proxy_pass_header 	Set-Cookie;
+	    proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    Web-Server-Type  nginx;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://publish_web; #转发域名或IP加端口的请求
+    }
+
+    location ~* .*\.(htm|html|js|css|gif|jpg|png|jpeg|bmp|ico|swf|flv)(\?[^\.]+)?$ {
+        proxy_next_upstream http_500 http_502 http_503 http_504 error timeout invalid_header;
+        proxy_set_header    Host &quot;mdeudgbo.com&quot;;
+	    proxy_set_header    X-Real-IP $remote_addr;
+        proxy_set_header    Web-Server-Type  nginx;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+		
+		proxy_cache cache_one; # 表示使用前面http模块里定义的名为&quot;cache_one&quot; 的缓存，这个名字是可以随便定义的
+        proxy_cache_valid 200 304 15m; #表示缓存http状态码为200(表示成功)的时间为10 分钟
+        proxy_cache_valid 301 302 10m;
+        proxy_cache_valid any 1m;
+        proxy_cache_key $host$uri$is_args$args; #指定缓存所使用的key的组合字符串，然后用md5进行加密。
+		
+        add_header Ten-webcache '$upstream_cache_status from $host';
+        proxy_pass http://publish_web;
+        expires 30m;
+        access_log off;
+    }
+}
+</code></pre>
+<h2 id="nginxconf-主配置">nginx.conf 主配置</h2>
+<pre><code class="language-sh">#vim  /etc/nginx/nginx.conf
+
+user root;
+worker_processes 8;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 65535;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '
+                      '$status $body_bytes_sent &quot;$http_referer&quot; '
+                      '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+	
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    include /etc/nginx/conf.d/*.conf;
+
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx 编译安装]]></title>
+        <id>https://anson626.github.io/post/nginx-bian-yi-an-zhuang/</id>
+        <link href="https://anson626.github.io/post/nginx-bian-yi-an-zhuang/">
+        </link>
+        <updated>2022-09-07T03:40:52.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="nginx-编译安装">Nginx 编译安装</h2>
+<pre><code class="language-sh">#!/bin/bash
+#
+
+insdir=/usr/local/nginx
+pw=`pwd`
+
+tarname=`ls -l |grep '^-.*nginx-1.*tar\.gz$'| awk '{print $9}'`
+tar xf $tarname &amp;&amp; pr &quot;解压源码包成功&quot; 1  ||pr &quot;解压源码包失败&quot; 2
+tardir=`ls -l |grep '^d.*nginx-1.*'| awk '{print $9}'`
+. /etc/init.d/functions
+pr() {
+case $2 in
+1)
+        ex=true
+        ;;
+2)
+        ex=false
+        ;;
+*)
+        echo &quot;printout函数参数错误&quot;
+        exit 1
+        ;;
+esac
+action &quot;$1&quot; /bin/$ex
+}
+
+yum install -y  lrzsz  screen lsof gcc gcc-c++ \
+glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools iotop bc \
+zip unzip zlib-devel bash-completion nfs-utils automake libxml2 libxml2-devel \
+libxslt libxslt-devel perl perl-ExtUtils-Embed -y &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+pr &quot;安装开发包&quot; 1 ||pr &quot;安装开发包&quot; 2
+
+mkdir -p $insdir &amp;&amp; pr &quot;创建安装路基目录&quot; 1 ||pr &quot;创建安装路基目录&quot; 2
+echo &quot;执行configure 请稍后 &quot;
+
+cd $pw/$tardir
+./configure --prefix=$insdir/ \
+--user=nginx \
+--group=nginx \
+--with-http_ssl_module \
+--with-http_v2_module \
+--with-http_realip_module \
+--with-http_stub_status_module \
+--with-http_gzip_static_module \
+--with-pcre \
+--with-stream \
+--with-stream_ssl_module \
+--with-stream_realip_module  &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+pr &quot;执行configure&quot; 1 ||pr &quot;执行configure&quot; 2
+echo &quot;make install 中 请稍等 &quot;
+make &gt;/dev/null 2&gt;&amp;1 &amp;&amp; make install &gt;/dev/null 2&gt;&amp;1 &amp;&amp; \
+ pr &quot;make install&quot; 1 ||pr &quot;make install&quot; 2
+ 
+useradd nginx -s /sbin/nologin -u 2000
+chown nginx.nginx -R $insdir/ 
+
+ln -s $insdir/sbin/nginx  /usr/sbin/nginx &gt;/dev/null 2&gt;&amp;1
+echo &quot;[Unit] 
+Description=The nginx HTTP and reverse proxy server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=$insdir/logs/nginx.pid
+
+
+ExecStartPre=/usr/bin/rm -f $insdir/logs/nginx.pid 
+ExecStartPre=$insdir/sbin/nginx -t
+ExecStart=$insdir/sbin/nginx
+ExecReload=/bin/kill -s HUP \$MAINPID
+
+#KillSignal=SIGQUIT
+#TimeoutStopSec=5
+KillMode=process
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target&quot; &gt; /usr/lib/systemd/system/nginx.service &amp;&amp; \
+pr &quot;创建服务脚本&quot; 1 ||pr &quot;创建服务脚本&quot; 2
+
+echo &quot;export NGINX_HOME=$insdir
+export PATH=\$PATH:\$NGINX_HOME/sbin&quot; &gt;/etc/profile.d/nginx.sh &amp;&amp; \
+pr &quot;配置环境变量&quot; 1 ||pr &quot;配置环境变量&quot; 2
+source /etc/profile.d/nginx.sh
+systemctl daemon-reload &amp;&amp; \
+systemctl start nginx  &amp;&amp; \
+systemctl enable nginx &amp;&amp; \
+pr &quot;启动NGINX&quot; 1 ||pr &quot;启动NGINX&quot; 2
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx 4 层代理配置]]></title>
+        <id>https://anson626.github.io/post/nginx-4-ceng-dai-li-pei-zhi/</id>
+        <link href="https://anson626.github.io/post/nginx-4-ceng-dai-li-pei-zhi/">
+        </link>
+        <updated>2022-09-07T03:40:36.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="nginx-4-层代理配置">Nginx 4 层代理配置</h2>
+<pre><code class="language-sh">
+https://www.aiopsclub.com/nginx/nginx_stream_proxy/
+
+需要先安装 stream
+yum install -y nginx-mod-stream
+
+使用端口反代
+load_module /usr/lib64/nginx/modules/ngx_stream_module.so;
+worker_processes 1;
+
+events {
+    worker_connections  1024;
+}
+
+
+stream {
+    upstream DBA_backend {
+        server 172.16.86.101:61122 max_fails=3 fail_timeout=30s;
+    }
+    server {
+        listen 61122;
+        proxy_connect_timeout 30s;
+        proxy_timeout 30s;
+        proxy_pass DBA_backend;
+    }
+}
+
+
+
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx - Fail2ban]]></title>
+        <id>https://anson626.github.io/post/nginx-fail2ban/</id>
+        <link href="https://anson626.github.io/post/nginx-fail2ban/">
+        </link>
+        <updated>2022-09-07T03:40:18.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="nginx-fail2ban">Nginx - Fail2ban</h2>
+<pre><code class="language-sh">fail2ban 限制DDOS 访问的软件
+
+参考文件
+https://www.moerats.com/archives/487/
+https://bobcares.com/blog/nginx-ddos-prevention/
+
+
+判断是否被DDOS
+How to Count Unique IPs &amp; Requests per IP in NGINX
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -nr |head -20
+
+
+在nginx.conf 配置
+
+    这部分是
+    map $http_x_forwarded_for  $clientRealIp {
+            &quot;&quot;      $remote_addr;
+                    ~^(?P&lt;firstAddr&gt;[0-9\.]+),?.*$  $firstAddr;
+    }
+    log_format  main  '$http_x_forwarded_for - $remote_user [$time_local] &quot;$request&quot; ' '$status $body_bytes_sent &quot;$http_referer&quot; ' '&quot;$http_user_agent&quot; ';
+    limit_req_zone $clientRealIp zone=ConnLimitZone:20m  rate=80r/s;
+    limit_req zone=ConnLimitZone burst=5 nodelay;
+
+
+安装faill2ban
+yum -y install epel-release
+#安装faill2ban
+yum -y install fail2ban
+
+
+创建fail2配置
+#新建配置
+vi /etc/fail2ban/jail.local
+
+[nginx-limit-req]
+enabled = true
+filter = nginx-limit-req  #这是使用req limit 的模块， /etc/fail2ban/filter.d/
+action = iptables-multiport[name=ReqLimit, port=&quot;http,https&quot;, protocol=tcp]  
+logpath = /var/log/nginx/*error.log  #指定nignx error log，fail2ban 会从这里获取信息
+findtime = 3  #查找时间，默认秒
+bantime = 1d #禁止访问时长，默认秒
+maxretry = 5  #重复触发次数
+
+安装httpd-tools 测试
+yum install httpd-tools 
+使用ab 软件在另外一台 -n 访问的次数 
+ab -n 1000 -c 10 -k -H &quot;Accept-Encoding: gzip, deflate&quot; http://192.168.133.106/
+
+
+如果触发fail2ban，就会出现限制了
+iptables 就会出现限制了
+
+iptables --delete f2b-ReqLimit -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Loki]]></title>
+        <id>https://anson626.github.io/post/loki/</id>
+        <link href="https://anson626.github.io/post/loki/">
+        </link>
+        <updated>2022-09-07T03:39:56.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="loki">Loki</h2>
+<pre><code class="language-sh">参考文件： https://www.cnblogs.com/chenrunxuan/p/13734906.html
+
+loki官网 https://github.com/grafana/loki/releases/
+配置文件官网  https://grafana.com/docs/loki/latest/installation/local/
+
+配置文件下载
+wget https://raw.githubusercontent.com/grafana/loki/master/cmd/loki/loki-local-config.yaml
+wget https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/promtail/promtail-local-config.yaml
+
+
+grafana 下载
+grafana 下载官网 https://grafana.com/grafana/download
+
+wget https://dl.grafana.com/oss/release/grafana-8.0.0-1.x86_64.rpm 
+sudo yum install grafana-8.0.0-1.x86_64.rpm
+
+systemctl start grafana-server
+systemctl enable grafana-server.service
+
+--------------------
+
+mkir /usr/local/etc/loki
+cd /usr/local/etc/loki
+
+wget https://github.com/grafana/loki/releases/download/v2.2.1/loki-linux-amd64.zip
+wget https://github.com/grafana/loki/releases/download/v2.2.1/promtail-linux-amd64.zip
+
+unzip loki-linux-amd64.zip
+unzip promtail-linux-amd64.zip
+
+
+loki Unit File 文件
+cat &gt; /etc/systemd/system/loki.service &lt;&lt;EOF
+[Unit]
+Description=loki
+After=network.target 
+
+[Service]
+ExecStart=/usr/local/etc/loki/loki-linux-amd64 \
+	-config.file=/usr/local/etc/loki/loki-local-config.yaml &amp;&gt;&gt; /usr/local/etc/loki/logs/loki-3100.log
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# systemctl daemon-reload &amp;&amp; systemctl start loki &amp;&amp; systemctl status loki &amp;&amp; systemctl enable loki
+
+Promtail Unit File 文件
+cat &gt; /etc/systemd/system/promtail.service &lt;&lt;EOF
+[Unit]
+Description=promtail
+After=network.target 
+
+[Service]
+ExecStart=/usr/local/etc/loki/promtail-linux-amd64 \
+	-config.file=/usr/local/etc/loki/promtail-local-config.yaml &amp;&gt;&gt; /usr/local/etc/loki/logs/promtail-9080.log
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+# systemctl daemon-reload &amp;&amp; systemctl start promtail &amp;&amp; systemctl status promtail &amp;&amp; systemctl enable promtail
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux 常用命令]]></title>
+        <id>https://anson626.github.io/post/linux-chang-yong-ming-ling/</id>
+        <link href="https://anson626.github.io/post/linux-chang-yong-ming-ling/">
+        </link>
+        <updated>2022-09-07T03:39:34.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="linux-常用命令">Linux 常用命令</h2>
+<pre><code class="language-sh">#监控网络流量命令
+iftop -nN -i ens5
+#https://blog.csdn.net/guotianqing/article/details/109822561
+
+查看
+timedatectl
+
+CST格式 = 上海时间的意识
+timedatectl set-timezone “Asia/Shanghai”
+</code></pre>
+<h2 id="日志查询grep">日志查询Grep</h2>
+<pre><code class="language-sh">
+查看关键字
+grep -r MU2608821366522978304 third-server-job-info-2021-11-28.*.log &gt;/tmp/2325556480.txt
+
+
+查看哪10秒里的日志 2021-11-26 16:14:5[0-9] 
+grep  '2021-11-26 16:14:5[0-9]' business-info.2021-11-26.*.log &gt;/tmp/lb-business-2021-11-26.txt
+
+
+查询2个条件
+grep  '2022-05-20 01:[0-3][0-9]:[0-9][0-9]'  business-info.2022-05-20.*.log |grep '获取用户:dongfafa123' -C 5 &gt;/tmp/lb-business2-2022-05-20.txt
+
+grep -A 5 'parttern' filename //打印匹配行的后5行
+grep -B 5 'parttern' filename //打印匹配行的前5行
+grep -C 5 'parttern' filename //打印匹配行的前后5行
+grep -5 'parttern' filename //打印匹配行的前后5行 
+
+tail -n 5 filename 查看文件最后5行内容
+head -n 5 filename 查看文件前5行内容
+sed -n '5,10p' 查看文件5-10行内容 
+
+-------------------
+在服务器上搜索
+
+显示最后 1000 行 的 内容 | 符合 0403737030061055651 的后五行
+tail output.log -n1000 |grep 0403737030061055651 -A 10
+
+-------------------
+查看该目录上的文件内容
+find ./ -name &quot;*.conf&quot; | xargs grep &quot;47.243.162.106&quot;
+</code></pre>
+<h2 id="notepad-使用">notepad ++ 使用</h2>
+<pre><code class="language-sh">Find lines not starting with &quot; in Notepad++
+^[^1]
+
+2个或以上的空格键
+[ ][ ]* 
+</code></pre>
+<h2 id="linux中shell变量012的含义解释">linux中shell变量<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲,'>#,</span>@,$0,$1,$2的含义解释:</h2>
+<pre><code class="language-sh">变量说明: 
+$$ 
+Shell本身的PID（ProcessID） 
+$! 
+Shell最后运行的后台Process的PID 
+$? 
+最后运行的命令的结束代码（返回值） 
+$- 
+使用Set命令设定的Flag一览 
+$* 
+所有参数列表。如&quot;$*&quot;用「&quot;」括起来的情况、以&quot;$1 $2 … $n&quot;的形式输出所有参数。 
+$@ 
+所有参数列表。如&quot;$@&quot;用「&quot;」括起来的情况、以&quot;$1&quot; &quot;$2&quot; … &quot;$n&quot; 的形式输出所有参数。 
+$# 
+添加到Shell的参数个数 
+$0 
+Shell本身的文件名 
+$1～$n 
+添加到Shell的各参数值。$1是第1参数、$2是第2参数…。 
+</code></pre>
+<h2 id="awk">awk</h2>
+<pre><code class="language-sh"> 组合查找
+cat test.txt |awk '/^00/ {++S[$NF]} END {for (a in S) print a,S[a]}'
+awk '/^00/ {++S[$NF]} END {for (a in S) print a,S[a]}' test.txt
+
+查看log 关键字组合 AWK， ARRAY ,FOR loop
+awk '{++S[$1]} END {for (a in S) print a ,S[a]}' test.log |sort -rn -k2
+
+查看log 关键字组合 
+awk '{print $1}' access.log|sort|uniq -c |sort -rn -k1
+
+---------------------------------------------------------------------------------
+
+while (condition) action 
+awk  'i=1 {} BEGIN {while (i&lt;10) {++i;print i}}'
+
+do ; action ; while (condition)
+awk 'BEGIN　｛do {i++;print i}while (i&lt;10)｝' 
+
+for loop 
+awk 'BEGIN {for (x=1;x++;x&lt;10) print x}'
+
+if else 两个条件
+grep &quot;abc&quot; /test.txt | awk {if ($1&lt;10) print $0 ; else print &quot;OK&quot;}
+
+一段时间数据写到另外一个文件
+awk '/14:00:00/,/14:05:00/'｛print｝ /test.txt &gt;&gt; abc123.txt
+</code></pre>
+<h2 id="iptables">iptables</h2>
+<pre><code class="language-sh">
+查看
+sudo iptables -nL |grep 18.163.237.127
+
+添加
+sudo iptables -I INPUT -p tcp -s 18.163.237.127 --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+iptables -I INPUT -p all -s 172.16.0.0/16 -j ACCEPT #开启内网全部端口
+
+删除
+iptables --delete INPUT -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+执行后需要保存
+service iptables save
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[k8s 常用命令]]></title>
+        <id>https://anson626.github.io/post/k8s-chang-yong-ming-ling/</id>
+        <link href="https://anson626.github.io/post/k8s-chang-yong-ming-ling/">
+        </link>
+        <updated>2022-09-07T03:39:10.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="k8s-常用命令">k8s 常用命令</h2>
+<pre><code class="language-sh">查看pod
+kubectl get pods --all-namespaces 
+kubectl get pod -n yinshang 
+
+查看日志
+kubectl logs subo-yinshang-task-backend-prod-646c9fc699-rdp9s -n yinshang -f |grep 回调任务订单号
+
+删除pod 
+kubectl delete pod -n yinshang subo-yinshang-task-backend-prod-646c9fc699-rdp9s
+
+批量删除
+kubectl delete pod -n yuletong --all
+
+#查看pod信息
+kubectl describe pods XXXX
+</code></pre>
+<h3 id="登录到服务器-eksbastion-服务器">登录到服务器 EKSbastion 服务器</h3>
+<pre><code class="language-sh">在从服务器登录到worker服务器 
+ssh -i eks-quickStart.pem 172.16.16.138
+
+查看域名 通过端口查看
+kubectl get svc -A |grep 30103 
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="C:%5CUsers%5Cyah62%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20220906222713253.png" alt="image-20220906222713253" loading="lazy"></figure>
+<h2 id="ingress-配置">ingress 配置</h2>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-demo
+  annotations:
+    kubernetes.io/ingress.class: &quot;nginx&quot;
+spec:
+  rules:
+  - host: www.ik8s.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: &quot;demoapp-deploy&quot;
+            port: 
+              number: 80
+</code></pre>
+]]></content>
+    </entry>
+</feed>

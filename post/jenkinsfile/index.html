@@ -1,0 +1,409 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jenkinsfile | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Jenkinsfile | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Jenkins Pipelines
+环境规划 - 在目标机器执行
+
+添加普通用户 devops
+
+#添加用户
+useradd devops
+#为了让jumpserver能够顺利登录创建秘钥
+su - devops
+
+#生成 .ssh 目录
+..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Jenkinsfile
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-04
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="jenkins-pipelines">Jenkins Pipelines</h1>
+<h2 id="环境规划-在目标机器执行">环境规划 - 在目标机器执行</h2>
+<ul>
+<li>添加普通用户 devops</li>
+</ul>
+<pre><code class="language-shell">#添加用户
+useradd devops
+#为了让jumpserver能够顺利登录创建秘钥
+su - devops
+
+#生成 .ssh 目录
+ssh localhost
+
+#导入公钥，方便连接服务器
+cd .ssh
+echo &quot;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTxfJ8Cj+TvmKz/6+JMaXWQ8FQQleQ7hfvX3IAhYta+El1EoUHuwDAStO3Z/oJZE2oNht2k9O806uRbsOxHaTzkJTf1ijEg2g1TMDyNQ9CVLZcBhVaw8vrJln4fnZe5ksup0lANknLvKJhnPs7J49FrWYPlKDzayNihQjuYeuQApH71X9o7Q8Qnvw0Azl/9/qjzOjIOtFD+NUX5kXWcWqYSohD5Y5qi4/kg6MUJK4ubdFeqiCWov9paYi/yyQ8zzW1KrNT4N1ufyc1VL8SWxSUpp1UQIBo3U6Nzi5AELNfeLnmhKj00dlcC83g7Hgt9J4+Lye7vslUZuXZnLCqLaa3 root@devops1-registry
+&quot; &gt;&gt;authorized_keys
+</code></pre>
+<ul>
+<li>用于启动java后端服务的用户</li>
+</ul>
+<pre><code class="language-shell">useradd -r -s /bin/false -g root java-app
+</code></pre>
+<ul>
+<li>sudo配置</li>
+</ul>
+<pre><code class="language-shell">#修改权限
+chmod 755 /etc/sudoers
+
+#root用户编辑/etc/sudoers添加以下内容
+devops ALL=(ALL) NOPASSWD: /usr/sbin/iptables,/bin/whoami,/usr/bin/cp,/usr/bin/cd,/usr/bin/unzip,/usr/bin/ls,/usr/bin/free,/usr/bin/top,/usr/bin/df,/usr/sbin/ss,/usr/sbin/ip,/usr/bin/vim,/usr/bin/sed,/usr/local/src/nginx/sbin/nginx,/bin/systemctl
+
+#改回权限
+chmod 440 /etc/sudoers
+</code></pre>
+<h2 id="目标服务器-java服务规划">目标服务器 - Java服务规划</h2>
+<ul>
+<li>路径规划</li>
+</ul>
+<pre><code class="language-sh">#创建个服务目录 jar包存放在此目录
+mkdir -p /usr/local/src/java/gun
+chown -R java-app:devops /usr/local/src/java
+chmod -R 770 /usr/local/src/java
+</code></pre>
+<ul>
+<li>生成 unitfile</li>
+</ul>
+<pre><code class="language-sh">cat &gt;/usr/lib/systemd/system/guns.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/guns
+Environment=SERVER_PORT=9001
+Environment=JAR_NAME=guns.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre>
+<h2 id="安装jenkins-插件">安装jenkins 插件</h2>
+<p>安装2个常用的jenkins插件</p>
+<ul>
+<li>
+<p>Extended Choice Parameter</p>
+<p>配上 update，restart，stop，rollback</p>
+</li>
+<li>
+<p>Git Parameter</p>
+<p>安装后需要会显示一些报错，只要执行拉取一次后参数就会出来了</p>
+</li>
+</ul>
+<h2 id="jenkins-file">Jenkins File</h2>
+<ul>
+<li>配置参数 如 - Git Parameter等等 - http://www.mydlq.club/article/45/</li>
+<li>使用pipeline模块</li>
+</ul>
+<pre><code class="language-sh">pipeline {
+  agent any
+  tools {
+    //名称是根据maven 全局配置的
+    maven 'maven3.6.3'
+  }
+  environment {
+	GIT_URL=&quot;git@35.75.19.227:root/edisguns.git&quot;
+	KEY_DIR=&quot;/var/lib/jenkins/key/id_rsa&quot;
+  }
+
+  stages {
+    stage('拉代码') {
+		//Git Parameter 需要执行一次才能看到选项
+        steps {
+            checkout([$class: 'GitSCM', branches: [[name: &quot;${BRANCH}&quot;]], extensions: [], userRemoteConfigs: [[credentialsId: 'ssh-git-key-guns', url: &quot;${GIT_URL}&quot;]]])
+        }
+    }
+    stage('编译代码') {
+        steps {
+            sh &quot;&quot;&quot;
+            mvn clean install -Dmaven.test.skip=true
+            &quot;&quot;&quot;
+        }
+    }
+	
+	stage('更新包到主机运行') {
+		steps {
+			sh &quot;&quot;&quot;
+				echo &quot;======开始复制包到目标机器======&quot;
+                scp -i ${KEY_DIR} -o StrictHostKeyChecking=no -P 22 target/guns.jar devops@test.guns:/usr/local/src/java/guns/ &amp;&amp; \
+                ssh -i ${KEY_DIR} -o StrictHostKeyChecking=no -p 22 devops@test.guns  &quot;sudo systemctl restart guns.service&quot;
+			&quot;&quot;&quot;
+			}
+	}
+  }
+}
+
+</code></pre>
+<h2 id="for-循环">For 循环</h2>
+<ul>
+<li>
+<p>guns_service 变量 是使用 <strong>Extended Choice Parameter</strong> 变量</p>
+<p><strong>注意：</strong> delimiter 是需要修改为空格</p>
+</li>
+</ul>
+<pre><code class="language-sh">pipeline {
+  agent any
+
+  stages {
+	stage('Test') {
+		steps {
+			sh &quot;&quot;&quot;
+				for INT in ${guns_service};
+				do
+					echo &quot;\${INT}&quot;
+				done
+			&quot;&quot;&quot;
+			}
+	}
+  }
+}
+</code></pre>
+<h2 id="parallel-并行构建">Parallel 并行构建</h2>
+<ul>
+<li>https://blog.csdn.net/weixin_31323635/article/details/105118824</li>
+<li>参考例子，</li>
+</ul>
+<pre><code class="language-sh">pipeline {
+  agent any
+
+  environment {
+	GIT_URL=&quot;git@35.75.19.227:root/edisguns.git&quot;
+	KEY_DIR=&quot;/var/lib/jenkins/key/id_rsa&quot;
+  }
+  stages {
+	stage('更新包到主机运行') {
+		parallel {
+			stage('guns') {
+				steps {
+					sh &quot;&quot;&quot;
+							echo &quot;======开始复制包到目标机器======&quot;
+							ssh -i ${KEY_DIR} -o StrictHostKeyChecking=no -p 22 devops@test.guns  &quot;sudo systemctl restart guns.service&quot;
+					&quot;&quot;&quot;
+				}
+			}
+			stage('guns2') {
+				steps {
+					sh &quot;&quot;&quot;
+							echo &quot;======开始复制包到目标机器guns2======&quot;
+							ssh -i ${KEY_DIR} -o StrictHostKeyChecking=no -p 22 devops@test.guns  &quot;sudo systemctl restart guns2.service&quot;
+					&quot;&quot;&quot;
+				}
+			}
+			stage('guns3') {
+				steps {
+					sh &quot;&quot;&quot;
+							echo &quot;======开始复制包到目标机器guns3======&quot;
+							ssh -i ${KEY_DIR} -o StrictHostKeyChecking=no -p 22 devops@test.guns  &quot;sudo systemctl restart guns3.service&quot;
+					&quot;&quot;&quot;
+				}
+			}
+		}
+	}
+  }
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#jenkins-pipelines">Jenkins Pipelines</a>
+<ul>
+<li><a href="#%E7%8E%AF%E5%A2%83%E8%A7%84%E5%88%92-%E5%9C%A8%E7%9B%AE%E6%A0%87%E6%9C%BA%E5%99%A8%E6%89%A7%E8%A1%8C">环境规划 - 在目标机器执行</a></li>
+<li><a href="#%E7%9B%AE%E6%A0%87%E6%9C%8D%E5%8A%A1%E5%99%A8-java%E6%9C%8D%E5%8A%A1%E8%A7%84%E5%88%92">目标服务器 - Java服务规划</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85jenkins-%E6%8F%92%E4%BB%B6">安装jenkins 插件</a></li>
+<li><a href="#jenkins-file">Jenkins File</a></li>
+<li><a href="#for-%E5%BE%AA%E7%8E%AF">For 循环</a></li>
+<li><a href="#parallel-%E5%B9%B6%E8%A1%8C%E6%9E%84%E5%BB%BA">Parallel 并行构建</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/base-server-setup-admin/">
+              <h3 class="post-title">
+                Base Server Setup (admin)
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

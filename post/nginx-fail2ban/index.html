@@ -1,0 +1,264 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nginx - Fail2ban | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Nginx - Fail2ban | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Nginx - Fail2ban
+fail2ban 限制DDOS 访问的软件
+
+参考文件
+https://www.moerats.com/archives/487/
+https://bobcares.com/blog/nginx-ddos-..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Nginx - Fail2ban
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="nginx-fail2ban">Nginx - Fail2ban</h2>
+<pre><code class="language-sh">fail2ban 限制DDOS 访问的软件
+
+参考文件
+https://www.moerats.com/archives/487/
+https://bobcares.com/blog/nginx-ddos-prevention/
+
+
+判断是否被DDOS
+How to Count Unique IPs &amp; Requests per IP in NGINX
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -nr |head -20
+
+
+在nginx.conf 配置
+
+    这部分是
+    map $http_x_forwarded_for  $clientRealIp {
+            &quot;&quot;      $remote_addr;
+                    ~^(?P&lt;firstAddr&gt;[0-9\.]+),?.*$  $firstAddr;
+    }
+    log_format  main  '$http_x_forwarded_for - $remote_user [$time_local] &quot;$request&quot; ' '$status $body_bytes_sent &quot;$http_referer&quot; ' '&quot;$http_user_agent&quot; ';
+    limit_req_zone $clientRealIp zone=ConnLimitZone:20m  rate=80r/s;
+    limit_req zone=ConnLimitZone burst=5 nodelay;
+
+
+安装faill2ban
+yum -y install epel-release
+#安装faill2ban
+yum -y install fail2ban
+
+
+创建fail2配置
+#新建配置
+vi /etc/fail2ban/jail.local
+
+[nginx-limit-req]
+enabled = true
+filter = nginx-limit-req  #这是使用req limit 的模块， /etc/fail2ban/filter.d/
+action = iptables-multiport[name=ReqLimit, port=&quot;http,https&quot;, protocol=tcp]  
+logpath = /var/log/nginx/*error.log  #指定nignx error log，fail2ban 会从这里获取信息
+findtime = 3  #查找时间，默认秒
+bantime = 1d #禁止访问时长，默认秒
+maxretry = 5  #重复触发次数
+
+安装httpd-tools 测试
+yum install httpd-tools 
+使用ab 软件在另外一台 -n 访问的次数 
+ab -n 1000 -c 10 -k -H &quot;Accept-Encoding: gzip, deflate&quot; http://192.168.133.106/
+
+
+如果触发fail2ban，就会出现限制了
+iptables 就会出现限制了
+
+iptables --delete f2b-ReqLimit -p tcp -s 18.163.237.127 --dport 8090 -j ACCEPT
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#nginx-fail2ban">Nginx - Fail2ban</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/loki/">
+              <h3 class="post-title">
+                Loki
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

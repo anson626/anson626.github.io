@@ -1,0 +1,287 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mvn 测试 tags:Mvn | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Mvn 测试 tags:Mvn | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Install JDK
+install the jdk version 8
+yum -y install java-1.8.0-openjdk.x86_64 java-1.8.0-openjdk-devel.x86_64
+
+--------..." />
+    <meta name="keywords" content="Mvn" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Mvn 测试 tags:Mvn
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-07-10
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+                <a href="https://anson626.github.io/tag/Mvn/" class="post-tag">
+                  # Mvn
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h3 id="install-jdk">Install JDK</h3>
+<p>install the jdk version 8</p>
+<pre><code>yum -y install java-1.8.0-openjdk.x86_64 java-1.8.0-openjdk-devel.x86_64
+</code></pre>
+<p>------------------------------------------------</p>
+<h3 id="install-maven">Install Maven</h3>
+<p>Maven In production we are 3.6.3 version</p>
+<pre><code class="language-sh">wget https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -P /opt/
+cd /opt/
+tar xf /opt/apache-maven-3.6.3-bin.tar.gz
+ln -s /opt/apache-maven-3.6.3 /opt/maven
+
+vim /etc/profile.d/maven.sh
+
+export M2_HOME=/opt/maven
+export MAVEN_HOME=/opt/maven
+export PATH=${M2_HOME}/bin:${PATH}
+
+source /etc/profile.d/maven.sh
+
+#Check version 
+mvn --version
+</code></pre>
+<p>---------------------------------------------------------</p>
+<h3 id="install-java-program-guns">Install Java Program  - GUNS</h3>
+<pre><code class="language-sh">yum install git -y
+
+git clone https://gitee.com/stylefeng/guns.git
+</code></pre>
+<p>Running GUNS program need to Install mysql</p>
+<pre><code class="language-sh">vim /etc/yum.repos.d/MariaDB.repo
+
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.4/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+yum -y install MariaDB-server MariaDB-client
+
+#Check the installed package 
+rpm -qi MariaDB-server
+
+#Start and enable MariaDB service
+systemctl start mariadb &amp;&amp; systemctl enable mariadb
+</code></pre>
+<p>Provide user Privileges and import database</p>
+<pre><code class="language-sh">GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY '123456';
+
+#must add guns tables
+CREATE DATABASE guns;
+
+#FYI the user password must same with the application 
+/opt/guns/guns/src/main/resources/application-local.yml
+</code></pre>
+<p>In path pom.xml ，using maven compile and install</p>
+<pre><code class="language-sh">cd /opt/guns
+mvn  clean  install -Dmaven.test.skip=true
+</code></pre>
+<p>After the installation is complete, you will see the jar package. Run the jar file</p>
+<pre><code class="language-sh">cd /opt/guns/target
+
+java -jar  guns.jar # Run on front-end 
+nohup java -jar  guns.jar &amp;    #Run in back-end 
+</code></pre>
+<p>Check the jar file status</p>
+<pre><code class="language-sh">jps -mlvV
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#install-jdk">Install JDK</a></li>
+<li><a href="#install-maven">Install Maven</a></li>
+<li><a href="#install-java-program-guns">Install Java Program  - GUNS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/hello-gridea/">
+              <h3 class="post-title">
+                Hello 你好
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

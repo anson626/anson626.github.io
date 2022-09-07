@@ -1,0 +1,274 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loki | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Loki | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Loki
+参考文件： https://www.cnblogs.com/chenrunxuan/p/13734906.html
+
+loki官网 https://github.com/grafana/loki/releases/
+配置文件官网 ..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Loki
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-07
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="loki">Loki</h2>
+<pre><code class="language-sh">参考文件： https://www.cnblogs.com/chenrunxuan/p/13734906.html
+
+loki官网 https://github.com/grafana/loki/releases/
+配置文件官网  https://grafana.com/docs/loki/latest/installation/local/
+
+配置文件下载
+wget https://raw.githubusercontent.com/grafana/loki/master/cmd/loki/loki-local-config.yaml
+wget https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/promtail/promtail-local-config.yaml
+
+
+grafana 下载
+grafana 下载官网 https://grafana.com/grafana/download
+
+wget https://dl.grafana.com/oss/release/grafana-8.0.0-1.x86_64.rpm 
+sudo yum install grafana-8.0.0-1.x86_64.rpm
+
+systemctl start grafana-server
+systemctl enable grafana-server.service
+
+--------------------
+
+mkir /usr/local/etc/loki
+cd /usr/local/etc/loki
+
+wget https://github.com/grafana/loki/releases/download/v2.2.1/loki-linux-amd64.zip
+wget https://github.com/grafana/loki/releases/download/v2.2.1/promtail-linux-amd64.zip
+
+unzip loki-linux-amd64.zip
+unzip promtail-linux-amd64.zip
+
+
+loki Unit File 文件
+cat &gt; /etc/systemd/system/loki.service &lt;&lt;EOF
+[Unit]
+Description=loki
+After=network.target 
+
+[Service]
+ExecStart=/usr/local/etc/loki/loki-linux-amd64 \
+	-config.file=/usr/local/etc/loki/loki-local-config.yaml &amp;&gt;&gt; /usr/local/etc/loki/logs/loki-3100.log
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# systemctl daemon-reload &amp;&amp; systemctl start loki &amp;&amp; systemctl status loki &amp;&amp; systemctl enable loki
+
+Promtail Unit File 文件
+cat &gt; /etc/systemd/system/promtail.service &lt;&lt;EOF
+[Unit]
+Description=promtail
+After=network.target 
+
+[Service]
+ExecStart=/usr/local/etc/loki/promtail-linux-amd64 \
+	-config.file=/usr/local/etc/loki/promtail-local-config.yaml &amp;&gt;&gt; /usr/local/etc/loki/logs/promtail-9080.log
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+# systemctl daemon-reload &amp;&amp; systemctl start promtail &amp;&amp; systemctl status promtail &amp;&amp; systemctl enable promtail
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#loki">Loki</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/linux-chang-yong-ming-ling/">
+              <h3 class="post-title">
+                Linux 常用命令
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

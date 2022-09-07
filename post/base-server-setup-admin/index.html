@@ -1,0 +1,800 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Base Server Setup (admin) | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Base Server Setup (admin) | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="****# admin规划
+用户规划
+
+
+root用户
+
+
+#使用admin.pam 秘钥登录
+
+
+
+运维用的普通用户  ops
+#添加用户
+useradd ops
+#为了让jumpserver能够顺利登录创建秘钥
+su - ops
+
+#生..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Base Server Setup (admin)
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-04
+              </span>
+              <span>
+                17 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>****# admin规划</p>
+<h2 id="用户规划">用户规划</h2>
+<ul>
+<li>
+<p>root用户</p>
+</li>
+<li>
+<pre><code class="language-sh">#使用admin.pam 秘钥登录
+</code></pre>
+</li>
+<li>
+<p>运维用的普通用户  ops</p>
+<pre><code class="language-sh">#添加用户
+useradd ops
+#为了让jumpserver能够顺利登录创建秘钥
+su - ops
+
+#生成 .ssh 目录
+ssh localhost
+
+#拷贝出authorized_keys 私钥和公钥配置jumpservice需要用到 随后所有admin都是用此密钥对（复制到.ssh目录即可 但需要注意权限 除公钥644权限其他两个文件都是600）
+
+#导入jumpserver的公钥 方便使用堡垒机链接(root)
+cd .ssh
+echo &quot;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCj/0jXGptMn4X0JOFiyLIq2Ee6dp7D24f/Tvm3BmLovuBdsZaF2Zmrlec6jan/4+zOXMfdA6w3g+ZqV13dglrksHTudXHvFiCNwpkB0eVBecWHZSVdUVac3/FNifuMsRTvl4ESr0fiQjqFChZ+v2K73R3Jl4qhtUDHQ1ZKPn1uKh0pT/aFJ3yi6/eHph9rttS7IfVRqoorNpLQ56bT3eK7HstbavS8tzOvXuFYQsSKFVon62oALgaqTYFyK1eUzRMmQjZ36OjDdiFsyZ1OfF7udV3ZRKfstaNm1cga/zfmh/ObtZoP008EgFgdL2osv3t4lhtAxLRwZt3IEkjG1tfr root@iZj6chd6thd1zpt6cqqlqpZ
+&quot; &gt;&gt;authorized_keys
+#导入jumpserver的公钥 方便使用堡垒机链接(ops)
+cd .ssh
+echo &quot;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClOFGWH961JOByHToFSbidl1IRFfYeT44XnW28pi7h0Jp5ElVVPbA+gEgdI88chVS+xxn7TxT3ceLB/W+3kJBtdN0BuUEOUB+GeHup+7fxEnF91oy7xDGBH/GvDLoaGFuO7fIozB1HYge0hPhPmB1ZIsGoFF8jmQ7yq59pi4to+++Vi9wkDFhFy5owib0R7islnzgpRXByDTJpyFz7Z0lVBj99ZqTOaY7q7UtNWYteansb2scQXssDkKiMkLHs7dSXM35yaju9cUkut/3ejfxSIllPIJqasxNUS3PWe6IOc54mJ+8fCkfQuVIGEhMkU5P6ySyhqzUVUzzfGO/V8NBJ ops@iZj6chd6thd1zpt6cqqlqpZ&quot; &gt;&gt;authorized_keys
+
+
+chmod 600 authorized_keys
+</code></pre>
+</li>
+<li>
+<p>用于启动java后端服务的用户</p>
+<pre><code class="language-sh">useradd -r -s /bin/false -g root java-app
+</code></pre>
+</li>
+<li>
+<p>sudo配置</p>
+<pre><code class="language-sh">#修改权限
+chmod 755 /etc/sudoers
+#root用户编辑/etc/sudoers添加以下内容
+ops ALL=(ALL) NOPASSWD: /usr/sbin/iptables,/bin/whoami,/usr/bin/cp,/usr/bin/cd,/usr/bin/unzip,/usr/bin/ls,/usr/bin/free,/usr/bin/top,/usr/bin/df,/usr/sbin/ss,/usr/sbin/ip,/usr/bin/vim,/usr/bin/sed,/usr/local/src/nginx/sbin/nginx,/bin/systemctl
+#root用户编辑/etc/sudoers'修改成'以下内容
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/src/nginx/sbin
+#改回权限
+chmod 440 /etc/sudoers
+</code></pre>
+</li>
+</ul>
+<h2 id="安装zsh">安装zsh</h2>
+<pre><code class="language-sh">#安装  注意所有用户都要安装一次
+yum install -y zsh git wget lrzsz
+chsh --shell /bin/zsh [用户名]  #注意这里需要root用户操作
+sh -c &quot;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;
+sed -i &quot;s/ZSH_THEME=.*/ZSH_THEME=\&quot;agnoster\&quot;/g&quot; ~/.zshrc 
+#后重新登陆
+</code></pre>
+<h2 id="安装dockerdocker-compose">安装docker，docker-compose</h2>
+<pre><code class="language-sh">#docker二进制部署
+wget https://download.docker.com/linux/static/stable/x86_64/docker-19.03.14.tgz 
+tar xf docker-19.03.14.tgz &amp;&amp; mv docker/* /usr/bin/ &amp;&amp; rm -rf docker*.tg
+
+#unitfile
+cat &gt;/usr/lib/systemd/system/docker.service &lt;&lt;'EOF'
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target firewalld.service
+Wants=network-online.target
+
+[Service]
+Environment=&quot;PATH=/opt/kube/bin:/bin:/sbin:/usr/bin:/usr/sbin&quot;
+ExecStartPost=/sbin/iptables -I FORWARD -s 0.0.0.0/0 -j ACCEPT
+Type=notify
+ExecStart=/usr/bin/dockerd
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutSec=0
+RestartSec=2
+Restart=always
+StartLimitBurst=3
+StartLimitInterval=60s
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+Delegate=yes
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+mkdir -p /etc/docker/
+mkdir -p /usr/local/src/docker-app/docker-daemon-data
+
+
+cat &gt;/etc/docker/daemon.json &lt;&lt;EOF
+{
+  &quot;data-root&quot;: &quot;/usr/local/src/docker-app/docker-daemon-data&quot;,
+  &quot;exec-opts&quot;: [ &quot;native.cgroupdriver=cgroupfs&quot; ],
+  &quot;registry-mirrors&quot;: [ &quot;https://docker.mirrors.ustc.edu.cn&quot;, &quot;http://hub-mirror.c.163.com&quot; ],
+  &quot;insecure-registries&quot;: [&quot;127.0.0.1/8&quot;],
+  &quot;max-concurrent-downloads&quot;: 10,
+  &quot;log-driver&quot;: &quot;json-file&quot;,
+  &quot;log-opts&quot;: {
+       &quot;max-size&quot;: &quot;100m&quot;,
+       &quot;max-file&quot;: &quot;3&quot;
+   },
+  &quot;log-level&quot;: &quot;warn&quot;,
+  &quot;log-opts&quot;: {
+    &quot;max-size&quot;: &quot;15m&quot;,
+    &quot;max-file&quot;: &quot;3&quot;
+    },
+  &quot;storage-driver&quot;: &quot;overlay2&quot;
+}
+EOF
+
+systemctl daemon-reload &amp;&amp; systemctl enable docker &amp;&amp; systemctl start docker
+
+#验证
+docker info
+#安装docker-compose
+yum install -y docker-compose
+</code></pre>
+<h2 id="系统优化">系统优化</h2>
+<pre><code class="language-sh">#升级
+yum update -y
+#安装常用包
+yum install -y vim wget psmisc tree lrzsz  ntpdate  java-1.8.0-openjdk java-1.8.0-openjdk-devel
+
+</code></pre>
+<pre><code class="language-sh">#内核优化/etc/sysctl.conf 添加一下几项
+fs.file-max = 6553560
+net.ipv4.tcp_syn_retries = 1
+net.ipv4.tcp_synack_retries = 1
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_probes = 3
+net.ipv4.tcp_keepalive_intvl =15
+net.ipv4.tcp_retries2 = 5
+net.ipv4.tcp_fin_timeout = 2
+net.ipv4.tcp_max_tw_buckets = 36000
+net.ipv4.tcp_tw_recycle = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_max_orphans = 32768
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_syn_backlog = 16384
+net.ipv4.tcp_wmem = 8192 131072 16777216
+net.ipv4.tcp_rmem = 32768 131072 16777216
+net.ipv4.tcp_mem = 786432 1048576 1572864
+net.ipv4.ip_local_port_range = 1024 65000
+net.core.somaxconn = 16384
+net.core.netdev_max_backlog = 16384
+</code></pre>
+<pre><code class="language-sh">#文件打开数配额修改配置文件/etc/security/limits.conf
+* soft nofile 655350
+* hard nofile 655350
+</code></pre>
+<pre><code class="language-sh">#ssh防止中断 和修改sshd端口   修改配置文件 /etc/ssh/sshd_config 
+Port 60122
+ClientAliveInterval 60
+ClientAliveCountMax 86400
+#重启sshd服务
+systemctl restart sshd
+</code></pre>
+<h2 id="内核升级">内核升级</h2>
+<pre><code class="language-sh">#安装yum源
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+#安装内核
+yum -y  --enablerepo=elrepo-kernel install kernel-lt
+#配置新的内核生效/etc/default/grub
+GRUB_DEFAULT=0
+#生成引导
+grub2-mkconfig -o /boot/grub2/grub.cfg
+#重启生效
+shutdown -r now
+</code></pre>
+<h2 id="安装nginx">安装nginx</h2>
+<pre><code class="language-sh">#下载nginx包
+wget https://nginx.org/download/nginx-1.21.6.tar.gz
+tar xf nginx-1.21.6.tar.gz
+cd nginx-1.21.6
+#安装编译需要的包
+yum install -y  lrzsz  screen lsof gcc gcc-c++ \
+glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel net-tools iotop bc \
+zip unzip zlib-devel bash-completion nfs-utils automake libxml2 libxml2-devel \
+libxslt libxslt-devel perl perl-ExtUtils-Embed GeoIP GeoIP-devel GeoIP-data 
+
+#创建安装目录
+mkdir -p /usr/local/src/nginx
+#创建用户
+useradd nginx -s /sbin/nologin -u 2000
+chown nginx.nginx -R /usr/local/src/nginx 
+#编译前配置
+./configure --prefix=/usr/local/src/nginx/ \
+--user=nginx \
+--group=nginx \
+--with-http_ssl_module \
+--with-http_v2_module \
+--with-http_realip_module \
+--with-http_stub_status_module \
+--with-http_gzip_static_module \
+--with-pcre \
+--with-http_flv_module \
+--with-stream \
+--with-stream_ssl_module \
+--with-threads \
+--with-stream_realip_module \
+--with-file-aio \
+--with-http_geoip_module \
+--with-stream_realip_module \
+--with-http_flv_module
+#编译并安装
+make &amp;&amp; make install
+#环境变量
+cat &gt;/etc/profile.d/nginx.sh &lt;&lt;'EOF'
+export PATH=/usr/local/src/nginx/sbin:$PATH
+EOF
+#生产unitfile
+echo &quot;[Unit] 
+Description=The nginx HTTP and reverse proxy server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/usr/local/src/nginx/logs/nginx.pid
+ExecStartPre=/usr/bin/rm -f /usr/local/src/nginx/logs/nginx.pid 
+ExecStartPre=/usr/local/src/nginx/sbin/nginx -t
+ExecStart=/usr/local/src/nginx/sbin/nginx
+ExecReload=/bin/kill -s HUP \$MAINPID
+
+#KillSignal=SIGQUIT
+#TimeoutStopSec=5
+KillMode=process
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target&quot; &gt; /usr/lib/systemd/system/nginx.service
+
+#启动服务并设置开机启动
+systemctl daemon-reload &amp;&amp; systemctl start nginx  &amp;&amp; systemctl enable nginx
+
+#环境变量
+source /etc/profile.d/nginx.sh
+
+</code></pre>
+<pre><code class="language-sh">#nginx日志的自动归档并清理  只保留7天
+cat &gt;/etc/logrotate.d/nginx &lt;&lt;'EOF'
+/usr/local/src/nginx/logs/*.log {
+  daily
+  rotate 7
+  missingok
+  notifempty
+  nocompress
+  delaycompress
+  create 0644 nginx nginx
+  postrotate
+      if [ -f /usr/local/src/nginx/logs/nginx.pid ];then
+            kill -USR1 `cat /usr/local/src/nginx/logs/nginx.pid`
+      fi
+  endscript
+}
+EOF
+</code></pre>
+<h2 id="java服务规划">java服务规划</h2>
+<pre><code class="language-sh">#创建个服务目录 jar包存放在此目录
+mkdir -p /usr/local/src/java/{admin-api,betting-api,gateway,job-api,lb-admin-api,special-api}
+chown -R java-app:ops /usr/local/src/java
+chmod -R 770 /usr/local/src/java
+</code></pre>
+<pre><code class="language-sh">#unitfile 生成
+# admin-api    
+cat &gt;/usr/lib/systemd/system/admin-api.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/admin-api
+Environment=SERVER_PORT=9001
+Environment=JAR_NAME=ims-admin-api.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#lb-admin-api
+cat &gt;/usr/lib/systemd/system/lb-admin-api.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/lb-admin-api
+Environment=SERVER_PORT=8001
+Environment=JAR_NAME=ims-admin-api.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# betting-api 
+cat &gt;/usr/lib/systemd/system/betting-api.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/betting-api
+Environment=SERVER_PORT=8004
+Environment=JAR_NAME=ims-game-betting.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+# gateway
+cat &gt;/usr/lib/systemd/system/gateway.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/gateway
+Environment=SERVER_PORT=9009
+Environment=JAR_NAME=ims-gateway.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# job-api
+cat &gt;/usr/lib/systemd/system/job-api.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/job-api
+Environment=SERVER_PORT=9005
+Environment=JAR_NAME=ims-job-api.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# special-api
+cat &gt;/usr/lib/systemd/system/special-api.service &lt;&lt;'EOF'
+[Unit]
+Description=Manage Java service
+[Service]
+WorkingDirectory=/usr/local/src/java/special-api
+Environment=SERVER_PORT=9008
+Environment=JAR_NAME=ims-special-api.jar
+ExecStart=/bin/bash -c &quot;exec /usr/bin/java \
+  -Dlog4j2.formatMsgNoLookups=true \
+  -jar $JAR_NAME --server.port=$SERVER_PORT  \
+  --spring.profiles.active=`hostname|/usr/bin/cut -f1 -d \&quot;-\&quot;`prod \
+  --spring.cloud.nacos.config.enabled=true \
+  &gt;&gt; output.log 2&gt;&amp;1 &quot;
+User=java-app
+Type=simple
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+#最后记得重载
+systemctl daemon-reload
+#配置服务开机启动
+systemctl enable admin-api betting-api gateway job-api lb-admin-api special-api
+</code></pre>
+<h2 id="promtail部署">promtail部署</h2>
+<pre><code class="language-sh">#安装
+cd /usr/local/src
+
+mkdir promtail
+cd promtail
+
+wget https://github.com/grafana/loki/releases/download/v2.1.0/promtail-linux-amd64.zip
+unzip promtail-linux-amd64.zip 
+
+useradd promtail -s /sbin/nologin 
+chown -R promtail:promtail /usr/local/src/promtail
+</code></pre>
+<pre><code class="language-sh">#根据hostname生成配置文件的脚本 由unitfile 调用 每次启动前会自动生成配置 所以改配置就改这个脚本然后重启生效
+#放在/usr/local/src/promtail/build_promtail_conf.sh
+#内容如下 记得配置 执行权限 和 promtail的用户权限
+
+
+#!/bin/bash
+cat &gt;promtail-local-config.yaml&lt;&lt;EOF
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /usr/local/src/promtail/positions.ymal
+
+clients:
+  - url: http://172.16.86.118:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-admin-lb1
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-admin-lb1
+          __path__: /usr/local/src/java/admin-api/output.log
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-admin-lb2
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-admin-lb2
+          __path__: /usr/local/src/java/lb-admin-api/output.log
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-betting
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-betting
+          __path__: /usr/local/src/java/betting-api/output.log
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-special-api
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-special-api
+          __path__: /usr/local/src/java/special-api/output.log
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-gateway
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-gateway
+          __path__: /usr/local/src/java/gateway/output.log
+  - job_name: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-job-api
+    static_configs:
+      - targets:
+          - 172.16.86.118
+        labels:
+          log_`hostname|/usr/bin/cut -f1 -d &quot;-&quot;`: `hostname|/usr/bin/cut -f1 -d &quot;-&quot;`-job-api
+          __path__: /usr/local/src/java/job-api/output.log
+EOF
+
+#生成脚本之后 记得加执行权限
+chmod +x /usr/local/src/promtail/build_promtail_conf.sh
+</code></pre>
+<pre><code class="language-sh">#注意需要用root 用户启动
+#unitfile
+cat &gt;/usr/lib/systemd/system/promtail.service &lt;&lt; 'EOF'
+[Unit]
+Description=promtail
+Documentation=https://github.com/grafana/loki/tree/master
+After=network.target
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/local/src/promtail/
+ExecStartPre=/usr/local/src/promtail/build_promtail_conf.sh
+ExecStart=/usr/local/src/promtail/promtail-linux-amd64 --config.file=promtail-local-config.yaml  &amp;&gt;&gt; promtail.log
+ExecStop=/bin/kill -9 $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre>
+<pre><code class="language-sh">#开机启动
+systemctl daemon-reload &amp;&amp; systemctl enable promtail.service &amp;&amp; systemctl start promtail.service
+</code></pre>
+<h2 id="node_exporter部署">node_exporter部署</h2>
+<pre><code class="language-sh">#安装
+wget https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz
+tar xf node_exporter-*.tar.gz -C /usr/local/src/
+mv /usr/local/src/node_exporter-1.2.2.linux-amd64 /usr/local/src/node_exporter 
+
+#unitfile
+cat &gt;/usr/lib/systemd/system/node-exporter.service &lt;&lt;EOF
+[Unit]
+Description=Prometheus Server
+After=network.target
+[Service]
+ExecStart=/usr/local/src/node_exporter/node_exporter
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#开机启动
+systemctl daemon-reload &amp;&amp; systemctl enable node-exporter.service &amp;&amp; systemctl start node-exporter.service 
+#验证
+curl 127.0.0.1:9100/metrics
+
+</code></pre>
+<h2 id="计划任务">计划任务</h2>
+<pre><code class="language-sh">#清理java标准输出日志
+1 00 * * * /usr/bin/find /usr/local/src/ -name 'output.log' -type f -print -exec /usr/bin/truncate -s 0 {} \; &gt;/dev/null 2&gt;&amp;1
+#清理promtail日志
+1 00 * * * /usr/bin/find /usr/local/src/promtail/ -name 'output.log' -type f -print -exec /usr/bin/truncate -s 0 {} \; &gt;/dev/null 2&gt;&amp;1
+#清理java生产的日志归档
+1 00 * * * /usr/bin/find /usr/local/src/java/ -name '*.log' -type f -mtime +7 -exec /usr/bin/rm -rf {} \; &gt;/dev/null 2&gt;&amp;1
+#时间同步
+*/20 * * * * /usr/sbin/ntpdate pool.ntp.org &gt; /dev/null 2&gt;&amp;1 
+</code></pre>
+<h2 id="iptables防火墙配置">iptables防火墙配置</h2>
+<pre><code class="language-sh">#内网全通
+iptables -I INPUT -p tcp -m tcp -s 172.16.0.0/16 -j ACCEPT
+#80端口开放两个vpn
+iptables -I INPUT -p tcp -m tcp -s 16.162.72.14/32 --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp -m tcp -s 18.163.237.127/32 --dport 80 -j ACCEPT
+#ssh端口开放外网访问 白名单由安全组配置
+iptables -I INPUT -p tcp -m tcp --dport 60122 -j ACCEPT
+#修改默认规则DORP
+iptables -P INPUT  DROP
+#解决不能上网问题
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+</code></pre>
+<pre><code class="language-sh">#保存规则
+iptables-save &gt; /etc/sysconfig/iptables
+#安装服务
+yum install -y iptables-services
+#自启动
+systemctl enable iptables.service
+
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%94%A8%E6%88%B7%E8%A7%84%E5%88%92">用户规划</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85zsh">安装zsh</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85dockerdocker-compose">安装docker，docker-compose</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E4%BC%98%E5%8C%96">系统优化</a></li>
+<li><a href="#%E5%86%85%E6%A0%B8%E5%8D%87%E7%BA%A7">内核升级</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85nginx">安装nginx</a></li>
+<li><a href="#java%E6%9C%8D%E5%8A%A1%E8%A7%84%E5%88%92">java服务规划</a></li>
+<li><a href="#promtail%E9%83%A8%E7%BD%B2">promtail部署</a></li>
+<li><a href="#node_exporter%E9%83%A8%E7%BD%B2">node_exporter部署</a></li>
+<li><a href="#%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1">计划任务</a></li>
+<li><a href="#iptables%E9%98%B2%E7%81%AB%E5%A2%99%E9%85%8D%E7%BD%AE">iptables防火墙配置</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/mvn-ce-shi/">
+              <h3 class="post-title">
+                Mvn 测试 tags:Mvn
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

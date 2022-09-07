@@ -1,0 +1,342 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ansible Playbook | Anson 博客</title>
+<link rel="shortcut icon" href="https://anson626.github.io/favicon.ico?v=1662522153730">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://anson626.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Ansible Playbook | Anson 博客 - Atom Feed" href="https://anson626.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Ansible Playbook
+---
+- hosts: '{{ host_list }}'
+  remote_user: zhiban24
+  gather_facts: True
+  vars:
+    jar_name: ims-a..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://anson626.github.io">
+  <img class="avatar" src="https://anson626.github.io/images/avatar.png?v=1662522153730" alt="">
+  </a>
+  <h1 class="site-title">
+    Anson 博客
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://anson626.github.io/post/mvn-ce-shi" class="menu">
+          测试
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Ansible Playbook
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-06
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>Ansible Playbook</p>
+<pre><code class="language-yaml">---
+- hosts: '{{ host_list }}'
+  remote_user: zhiban24
+  gather_facts: True
+  vars:
+    jar_name: ims-activity-api.jar
+    jar_path1: activity-api
+    jar_path2: lb-activity-api
+  tasks:
+  - name: update node1
+    shell: nohup /home/apps/{{ jar_path1 }}/update.sh
+  - name: sleep 10s
+    shell: sleep 10
+  - name: update node2
+    shell: nohup /home/apps/{{ jar_path2 }}/update.sh
+    when: (ansible_hostname != 'qphd-2')
+  - name: check the process
+    shell: ps -ef | grep -v grep | grep {{ jar_name }}
+</code></pre>
+<p>host</p>
+<pre><code class="language-sh">[api]
+jinshaqp-api   ansible_ssh_host=172.16.0.67
+liboqp-api   ansible_ssh_host=172.16.0.156
+1038qp-api   ansible_ssh_host=172.16.0.225
+tiantianqp-api ansible_ssh_host=172.16.0.35
+617qp-api ansible_ssh_host=172.16.0.61
+51qp-api ansible_ssh_host=172.16.0.216
+696qp-api ansible_ssh_host=172.16.0.140
+wnsqp-api ansible_ssh_host=172.16.0.99
+368qp-api ansible_ssh_host=172.16.0.190
+786qp-api ansible_ssh_host=172.16.0.75
+84qp-api ansible_ssh_host=172.16.0.123
+58qp-api ansible_ssh_host=172.16.0.146
+n01qp-api ansible_ssh_host=172.16.0.112
+
+[admin]
+jinshaqp-admin  ansible_ssh_host=172.16.0.55
+liboqp-admin   ansible_ssh_host=172.16.0.97
+1038qp-admin   ansible_ssh_host=172.16.0.114
+tiantianqp-admin ansible_ssh_host=172.16.0.188
+617qp-admin ansible_ssh_host=172.16.0.233
+51qp-admin ansible_ssh_host=172.16.0.227
+696qp-admin ansible_ssh_host=172.16.0.246
+wnsqp-admin ansible_ssh_host=172.16.0.142
+368qp-admin ansible_ssh_host=172.16.0.92
+786qp-admin ansible_ssh_host=172.16.0.33
+84qp-admin ansible_ssh_host=172.16.0.22
+58qp-admin ansible_ssh_host=172.16.0.181
+n01qp-admin ansible_ssh_host=172.16.0.134
+
+[all:vars]
+ansible_ssh_port=15878
+ansible_ssh_user=zhiban24
+</code></pre>
+<p>ansible.cfg</p>
+<pre><code class="language-sh">[defaults]
+inventory = hosts
+host_key_checking= False
+</code></pre>
+<p>shell 脚本</p>
+<pre><code class="language-sh">#!/bin/bash
+
+platForm=(1038 84 786 368 696 617 51 58 wns tiantian libo jinsha n01)
+jar_name=(activity-api business-api admin-api game-betting gateway job-api special-api h5-admin)
+action_name=(update exit_sys)
+
+show_platForm(){
+    count1=1
+    for i in ${platForm[*]}
+    do
+        echo -e &quot;\033[44m $count1&gt;   $i \033[0m&quot;
+        let ++count1
+    done
+    read -e -p '请输入要操作的平台:' num1
+}
+
+show_jar(){
+    count2=1
+    for i in ${jar_name[*]}
+    do
+        echo -e &quot;\033[44m $count2&gt;   $i \033[0m&quot;
+        let ++count2
+    done
+    read -e -p '请输入更新的jar包:' num2
+}
+
+show_action(){
+    count3=1
+    for i in ${action_name[*]}
+    do
+        echo -e &quot;\033[44m $count3&gt;   $i \033[0m&quot;
+        let ++count3
+    done
+    read -e -p '请输入要执行的操作:' num3
+}
+
+copy_source(){
+    echo -e &quot;\033[42m 正在为$1分发资源$2... \033[0m&quot;
+    if [[ $2 == &quot;activity-api&quot; ||  $2  == &quot;business-api&quot; ]];then
+         ansible $1qp-api -m copy -a &quot;src=/projects/backend/global-pf/ims-$2.jar dest=/home/development/apps/&quot;
+    elif [[ $2 == &quot;admin-api&quot; || $2 == &quot;game-betting&quot; || $2 == &quot;job-api&quot; || $2 == &quot;special-api&quot; || $2 == &quot;gateway&quot; ]];then
+         ansible $1qp-admin -m copy -a &quot;src=/projects/backend/global-pf/ims-$2.jar  dest=/home/development/apps/&quot;
+    elif [[ $2 == &quot;h5-admin&quot; ]];then
+         ansible $1qp-admin -m copy -a &quot;src=/projects/imsfront/dist.zip dest=/home/development/front/&quot;
+    else
+        continue
+    fi
+    echo -e &quot;\033[42m $1资源分$2发完毕！ \033[0m&quot;
+}
+
+update_source(){
+    echo -e &quot;\033[42m 正在为$1更新资源$2... \033[0m&quot;
+    if [[ $2 == &quot;activity-api&quot; ||  $2  == &quot;business-api&quot; ]];then
+         ansible-playbook -e &quot;host_list=$1qp-api&quot; -v yml/$2.yml
+    elif [[ $2 == &quot;admin-api&quot; || $2 == &quot;game-betting&quot; || $2 == &quot;job-api&quot; || $2 == &quot;special-api&quot;  || $2 == &quot;gateway&quot; ]];then
+         ansible-playbook -e &quot;host_list=$1qp-admin&quot; -v yml/$2.yml
+    elif [[ $2 == &quot;h5-admin&quot; ]];then
+         ansible-playbook -e &quot;host_list=$1qp-admin&quot;  yml/h5-admin.yml
+    else
+        exit 1
+    fi
+    echo -e &quot;\033[42m $1资源$2分发完毕！ \033[0m&quot;
+}
+
+show_platForm
+show_jar
+echo ${platForm[num1-1]}
+echo ${jar_name[num2-1]}
+copy_source ${platForm[num1-1]} ${jar_name[num2-1]}
+show_action
+echo ${action_name[num3-1]}
+if [[ ${action_name[num3-1]} == &quot;exit_sys&quot; ]];then
+    exit 1
+fi
+read -e -p '是否继续？yes|no&gt;:' confirm
+if [[ $confirm == &quot;yes&quot; ]];then
+    update_source ${platForm[num1-1]} ${jar_name[num2-1]} ${action_name[num3-1]}
+fi
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://anson626.github.io/post/amazon-mi-ma-she-ding/">
+              <h3 class="post-title">
+                amazon 密码设定
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'ef190ba3069867e097e9',
+    clientSecret: '217834c2dd894cee427477d857fa91396b2842c4',
+    repo: 'anson626.github.io',
+    owner: 'anson626',
+    admin: ['anson626'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://anson626.github.io/" target="_blank">Anson 博客</a>
+  <a class="rss" href="https://anson626.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
